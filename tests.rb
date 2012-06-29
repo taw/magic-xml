@@ -403,13 +403,13 @@ class XML_Tests < Test::Unit::TestCase
         ar_n_3 = a.subsequence(nil, b[3])
         ar_n_0 = a.subsequence(nil, b[0])
         
-        assert_equal("<foo><bar i='0'/><bar i='1'/><bar i='2'/><bar i='3'/><bar i='4'/></foo>", ar_n_n.to_s, "XML#subsequence should work")
-        assert_equal("<bar i='1'/><bar i='2'/><bar i='3'/><bar i='4'/>", ar_0_n.to_s, "XML#subsequence should work")
-        assert_equal("<bar i='2'/><bar i='3'/><bar i='4'/>", ar_1_n.to_s, "XML#subsequence should work")
-        assert_equal("", ar_4_n.to_s, "XML#subsequence should work")
-        assert_equal("<foo><bar i='0'/><bar i='1'/><bar i='2'/><bar i='3'/></foo>", ar_n_4.to_s, "XML#subsequence should work")
-        assert_equal("<foo><bar i='0'/><bar i='1'/><bar i='2'/></foo>", ar_n_3.to_s, "XML#subsequence should work")
-        assert_equal("<foo/>", ar_n_0.to_s, "XML#subsequence should work")
+        assert_equal("<foo><bar i='0'/><bar i='1'/><bar i='2'/><bar i='3'/><bar i='4'/></foo>", ar_n_n.join, "XML#subsequence should work")
+        assert_equal("<bar i='1'/><bar i='2'/><bar i='3'/><bar i='4'/>", ar_0_n.join, "XML#subsequence should work")
+        assert_equal("<bar i='2'/><bar i='3'/><bar i='4'/>", ar_1_n.join, "XML#subsequence should work")
+        assert_equal("", ar_4_n.join, "XML#subsequence should work")
+        assert_equal("<foo><bar i='0'/><bar i='1'/><bar i='2'/><bar i='3'/></foo>", ar_n_4.join, "XML#subsequence should work")
+        assert_equal("<foo><bar i='0'/><bar i='1'/><bar i='2'/></foo>", ar_n_3.join, "XML#subsequence should work")
+        assert_equal("<foo/>", ar_n_0.join, "XML#subsequence should work")
         
         a = XML.parse "<a>
                        <b j='0'><c i='0'/><c i='1'/><c i='2'/></b>
@@ -428,15 +428,15 @@ class XML_Tests < Test::Unit::TestCase
                 next unless i < j
                 ar = a.subsequence(ci,cj)
                 cs_present = (ar + ar.descendants).find_all{|x| x.is_a? XML and x.name == :c}.map{|n| n[:i].to_i}
-                assert_equal(((i+1)...j).to_a, cs_present, "XML#subsequence(c#{i}, c#{j}) should contain cs between #{i} and #{j}, exclusive, instead got: #{ar}")
+                assert_equal(((i+1)...j).to_a, cs_present, "XML#subsequence(c#{i}, c#{j}) should contain cs between #{i} and #{j}, exclusive, instead got: #{ar.join}")
             }
             ar = a.subsequence(ci,nil)
             cs_present = (ar + ar.descendants).find_all{|x| x.is_a? XML and x.name == :c}.map{|n| n[:i].to_i}
-            assert_equal(((i+1)..8).to_a, cs_present, "XML#subsequence(c#{i}, nil) should contain cs from #{i+1} to 8, instead got: #{ar}")
+            assert_equal(((i+1)..8).to_a, cs_present, "XML#subsequence(c#{i}, nil) should contain cs from #{i+1} to 8, instead got: #{ar.join}")
             
             ar = a.subsequence(nil,ci)
             cs_present = (ar + ar.descendants).find_all{|x| x.is_a? XML and x.name == :c}.map{|n| n[:i].to_i}
-            assert_equal((0...i).to_a, cs_present, "XML#subsequence(nil, c#{i}) should contain cs from 0 to #{i-1}, instead got: #{ar}")
+            assert_equal((0...i).to_a, cs_present, "XML#subsequence(nil, c#{i}) should contain cs from 0 to #{i-1}, instead got: #{ar.join}")
         }
     end
     
@@ -618,8 +618,8 @@ class XML_Tests < Test::Unit::TestCase
         bar     = []
         hello   = []
         
-        a.descendants {|d|
-            if d =~ :bar
+        a.descendants{|d|
+            if d.is_a?(XML) and d =~ :bar
                 bar << d
             end
 
@@ -658,9 +658,9 @@ class XML_Tests < Test::Unit::TestCase
         c = a.find_all{|x| x =~ p }
         d = a.find_all{|x| p === x }
         
-        assert_equal("<bar color='red'>5</bar><bar color='red' size='normal'>6</bar>", b.to_s, "Pattern matching with any/all should work")
-        assert_equal("<bar color='red'>5</bar><bar color='red' size='normal'>6</bar>", c.to_s, "Pattern matching with any/all should work")
-        assert_equal("<bar color='red'>5</bar><bar color='red' size='normal'>6</bar>", d.to_s, "Pattern matching with any/all should work")
+        assert_equal("<bar color='red'>5</bar><bar color='red' size='normal'>6</bar>", b.join, "Pattern matching with any/all should work")
+        assert_equal("<bar color='red'>5</bar><bar color='red' size='normal'>6</bar>", c.join, "Pattern matching with any/all should work")
+        assert_equal("<bar color='red'>5</bar><bar color='red' size='normal'>6</bar>", d.join, "Pattern matching with any/all should work")
     end
 
     # Test parse option :ignore_pretty_printing
@@ -790,11 +790,11 @@ class XML_Tests < Test::Unit::TestCase
     # Test multielement selectors
     def test_multielement_selectors
         a = XML.parse("<foo><bar color='blue'><x/></bar><bar color='red'><x><y i='1'/></x><y i='2'/></bar></foo>")
-        assert_equal("<x/><x><y i='1'/></x>", a.children(:bar, :x).to_s, "Multielement selectors should work")
-        assert_equal("<y i='2'/>", a.children(:bar, :y).to_s, "Multielement selectors should work")
-        assert_equal("<y i='1'/><y i='2'/>", a.children(:bar, :*, :y).to_s, "Multielement selectors should work")
-        assert_equal("<y i='1'/>", a.descendants(:x, :y).to_s, "Multielement selectors should work")
-        assert_equal("<y i='1'/><y i='2'/>", a.children(:bar, :*, :y).to_s, "Multielement selectors should work")
+        assert_equal("<x/><x><y i='1'/></x>", a.children(:bar, :x).join, "Multielement selectors should work")
+        assert_equal("<y i='2'/>", a.children(:bar, :y).join, "Multielement selectors should work")
+        assert_equal("<y i='1'/><y i='2'/>", a.children(:bar, :*, :y).join, "Multielement selectors should work")
+        assert_equal("<y i='1'/>", a.descendants(:x, :y).join, "Multielement selectors should work")
+        assert_equal("<y i='1'/><y i='2'/>", a.children(:bar, :*, :y).join, "Multielement selectors should work")
     end
     
     # Test deep_map

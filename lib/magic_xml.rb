@@ -747,7 +747,7 @@ class XML
     # XMLrenormalize_sequence("<hello   />, <world></world>!") =>
     # "<hello/>, <world/>!"
     def self.renormalize_sequence(stream)
-        parse_sequence(stream).to_s
+        parse_sequence(stream).join
     end
 end
 
@@ -1287,7 +1287,7 @@ class XML
     def map(pat=nil)
         r = XML.new(self.name, self.attrs)
         each{|c|
-            if !pat || c =~ pat
+            if !pat || (c.is_a?(XML) && c =~ pat)
                 r << yield(c)
             else
                 r << c
