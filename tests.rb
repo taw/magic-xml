@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby -Ilib
 require 'test/unit'
 require 'magic_xml'
 

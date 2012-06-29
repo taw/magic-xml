@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -I..
+#!/usr/bin/env ruby -I../lib
 
 require 'magic_xml'
 

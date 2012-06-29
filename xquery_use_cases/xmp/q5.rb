@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -I../.. -rmagic_xml
+#!/usr/bin/ruby -I../../lib -rmagic_xml
 
 # dash in tag names forces us to use
 # a bit less convenient methods.

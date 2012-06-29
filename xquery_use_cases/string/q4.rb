@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -I../.. -rmagic_xml
+#!/usr/bin/ruby -I../../lib -rmagic_xml
 
 company_data = XML.load('company-data.xml')
 # Root of company-data is company already,

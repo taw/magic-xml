@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -I../.. -rmagic_xml
+#!/usr/bin/ruby -I../../lib -rmagic_xml
 
 bids = XML.load('bids.xml').children(:bid_tuple)
 

@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -I../.. -rmagic_xml
+#!/usr/bin/ruby -I../../lib -rmagic_xml
 
 XML.results! {
     doc = XML.load('bib.xml')

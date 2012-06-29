@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -I../.. -rmagic_xml
+#!/usr/bin/ruby -I../../lib -rmagic_xml
 
 users = XML.load('users.xml').sort_by{|i| i[:@userid].to_i}
 bids  = XML.load('bids.xml')

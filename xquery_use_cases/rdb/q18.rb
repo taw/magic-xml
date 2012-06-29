@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -I../.. -rmagic_xml
+#!/usr/bin/ruby -I../../lib -rmagic_xml
 
 users = XML.load('users.xml').children(:user_tuple).sort_by{|i| i[:@name]}
 items = XML.load('items.xml')
