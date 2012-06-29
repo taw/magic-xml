@@ -1,0 +1,17 @@
+W3C XML Query Use Cases contains the following use cases:
+1. Use Case "XMP": Experiences and Exemplars
+2. Use Case "TREE": Queries that preserve hierarchy
+3. Use Case "SEQ" - Queries based on Sequence
+4. Use Case "R" - Access to Relational Data
+5. Use Case "SGML": Standard Generalized Markup Language
+6. Use Case "STRING": String Search
+7. Use Case "NS" - Queries Using Namespaces
+8. Use Case "PARTS" - Recursive Parts Explosion
+9. Use Case "STRONG" - queries that exploit strongly typed data
+
+Use cases 7 and 9 are not supported as they would require
+special support for XML namespaces and XML Schema,
+both of which are outside of scope of magic/xml.
+
+Of the rest 1, 2, 3, 4, 5, 6, 8 are coded.
+

@@ -1,0 +1,12 @@
+Use Case "PARTS" - Recursive Parts Explosion
+from XML Query Use Cases.
+
+http://www.w3.org/TR/xquery-use-cases/#parts
+
+Q1 - Convert the sample document from "partlist"
+     format to "parttree" format (see DTD section
+     for definitions). In the result document,
+     part containment is represented by containment
+     of one <part> element inside another. Each part
+     that is not part of any other part should appear
+     as a separate top-level element in the output document.

@@ -1,0 +1,41 @@
+Use Case "XMP": Experiences and Exemplars
+from XML Query Use Cases.
+
+Source: http://www.w3.org/TR/xquery-use-cases/#xmp
+
+Q1 - List books published by Addison-Wesley after 1991,
+     including their year and title.
+Q2 - Create a flat list of all the title-author pairs,
+     with each pair enclosed in a "result" element.
+Q3 - For each book in the bibliography, list the title and
+     authors, grouped inside a "result" element.
+Q4 - For each author in the bibliography, list the author's
+     name and the titles of all books by that author,
+     grouped inside a "result" element.
+Q5 - For each book found at both bstore1.example.com and
+     bstore2.example.com, list the title of the book and
+     its price from each source.
+Q6 - For each book that has at least one author, list the
+     title and first two authors, and an empty "et-al"
+     element if the book has additional authors.
+Q7 - List the titles and years of all books published
+     by Addison-Wesley after 1991, in alphabetic order.
+Q8 - Find books in which the name of some element ends
+     with the string "or" and the same element contains
+     the string "Suciu" somewhere in its content.
+     For each such book, return the title and the qualifying element.
+Q9 - In the document "books.xml", find all section or chapter
+     titles that contain the word "XML", regardless of the
+     level of nesting.
+Q10 - In the document "prices.xml", find the minimum price
+      for each book, in the form of a "minprice" element
+      with the book title as its title attribute.
+Q11 - For each book with an author, return the book with
+      its title and authors. For each book with an editor,
+      return a reference with the book title and the editor's affiliation.
+Q12 - Find pairs of books that have different titles but
+      the same set of authors (possibly in a different order).
+
+magic/xml solutions more or less follow XQuery solutions,
+with significant changes only where naive translation
+would result in very cumbersome code.

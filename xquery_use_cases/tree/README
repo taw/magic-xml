@@ -1,0 +1,23 @@
+Use Case "TREE": Queries that preserve hierarchy
+from XML Query Use Cases.
+
+Source: http://www.w3.org/TR/xquery-use-cases/#tree
+
+Q1 - Prepare a (nested) table of contents for Book1,
+     listing all the sections and their titles.
+     Preserve the original attributes of each <section> element, if any.
+Q2 - Prepare a (flat) figure list for Book1,
+     listing all the figures and their titles.
+     Preserve the original attributes of each <figure> element, if any.
+Q3 - How many sections are in Book1, and how many figures?
+Q4 - How many top-level sections are in Book1?
+Q5 - Make a flat list of the section elements in Book1.
+     In place of its original attributes, each section
+     element should have two attributes, containing the
+     title of the section and the number of figures
+     immediately contained in the section.
+Q6 - Make a nested list of the section elements in Book1,
+     preserving their original attributes and hierarchy.
+     Inside each section element, include the title of the
+     section and an element that includes the number of
+     figures immediately contained in the section.

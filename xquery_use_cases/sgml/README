@@ -1,0 +1,53 @@
+Use Case "SGML": Standard Generalized Markup Language
+from XML Query Use Cases.
+
+Source: http://www.w3.org/TR/xquery-use-cases/#sgml
+
+Q1 - Locate all paragraphs in the report (all "para"
+     elements occurring anywhere within the "report" element).
+Q2 - Locate all paragraph elements in an introduction
+     (all "para" elements directly contained within
+     an "intro" element).
+Q3 - Locate all paragraphs in the introduction of a
+     section that is in a chapter that has no
+     introduction (all "para" elements directly
+     contained within an "intro" element directly
+     contained in a "section" element directly
+     contained in a "chapter" element.
+     The "chapter" element must not directly
+     contain an "intro" element).
+Q4 - Locate the second paragraph in the third section
+     in the second chapter (the second "para" element
+     occurring in the third "section" element occurring
+     in the second "chapter" element occurring in
+     the "report").
+Q5 - Locate all classified paragraphs (all "para"
+     elements whose "security" attribute has the
+     value "c").
+Q6 - List the short titles of all sections (the
+     values of the "shorttitle" attributes of
+     all "section" elements, expressing each
+     short title as the value of a new element.)
+Q7 - Locate the initial letter of the initial
+     paragraph of all introductions (the first
+     character in the content [character content
+     as well as element content] of the first
+     "para" element contained in an "intro" element).
+Q8a - Locate all sections with a title that has
+      "is SGML" in it. The string may occur anywhere
+      in the descendants of the title element,
+      and markup boundaries are ignored.
+Q8b - Same as (Q8a), but the string "is SGML" cannot
+      be interrupted by sub-elements, and must
+      appear in a single text node.
+Q9  - Locate all the topics referenced by a
+      cross-reference anywhere in the report
+      (all the "topic" elements whose "topicid"
+      attribute value is the same as an "xrefid"
+      attribute value of any "xref" element).
+Q10 - Locate the closest title preceding the
+      cross-reference ("xref") element whose
+      "xrefid" attribute is "top4" (the "title"
+      element that would be touched last before
+      this "xref" element when touching each
+      element in document order).

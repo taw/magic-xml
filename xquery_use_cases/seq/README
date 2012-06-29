@@ -1,0 +1,12 @@
+Use Case "SEQ" - Queries based on Sequence
+from XML Query Use Cases.
+
+Source: http://www.w3.org/TR/xquery-use-cases/#seq
+
+Q1 - In the Procedure section of Report1, what Instruments were used in the second Incision?
+Q2 - In the Procedure section of Report1, what are the first two Instruments to be used?
+Q3 - In Report1, what Instruments were used in the first two Actions after the second Incision?
+Q4 - In Report1, find "Procedure" sections where no Anesthesia element occurs before the first Incision
+Q5 - In Report1, what happened between the first Incision and the second Incision?
+
+Warning: Result of Q5 is weird.

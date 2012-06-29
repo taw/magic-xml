@@ -1,0 +1,14 @@
+These examples show many different ways of using magic/xml for trivial things.
+
+_o - naive object-oriented
+_f - functional
+_m - monadic
+
+xhtml_ - uses XHTML module
+xml_   - does not use XHTML module
+
+Tasks:
+* Generating simple XML of pre-defined structure
+* Converting an Array to XHTML list
+
+[This is lame, more realistic examples are needed]

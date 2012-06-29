@@ -1,0 +1,50 @@
+from XML Query Use Cases.
+
+Source: http://www.w3.org/TR/xquery-use-cases/#rdb
+
+
+Q1 - List the item number and description of all bicycles that
+     currently have an auction in progress, ordered by item number.
+Q2 - For all bicycles, list the item number, description,
+     and highest bid (if any), ordered by item number.
+Q3 - Find cases where a user with a rating worse
+     (alphabetically, greater) than "C" is offering an item
+     with a reserve price of more than 1000.
+Q4 - List item numbers and descriptions of items that have no bids.
+     For bicycle(s) offered by Tom Jones that have received a bid,
+     list the item number, description, highest bid, and name
+     of the highest bidder, ordered by item number.
+Q6 - For each item whose highest bid is more than twice its
+     reserve price, list the item number, description,
+     reserve price, and highest bid.
+Q7 - Find the highest bid ever made for a bicycle or tricycle.
+Q8 - How many items were actioned (auction ended) in March 1999?
+Q9 - List the number of items auctioned each month in 1999 for
+     which data is available, ordered by month.
+Q10 - For each item that has received a bid, list the item
+      number, the highest bid, and the name of the highest
+      bidder, ordered by item number.
+Q11 - List the item number and description of the item(s)
+      that received the highest bid ever recorded, and the
+      amount of that bid.
+Q12 - List the item number and description of the item(s)
+      that received the largest number of bids, and the
+      number of bids it (or they) received.
+Q13 - For each user who has placed a bid, give the userid,
+      name, number of bids, and average bid, in order by userid.
+Q14 - List item numbers and average bids for items that have
+      received three or more bids, in descending order by average bid.
+Q15 - List names of users who have placed multiple bids of
+      at least $100 each.
+Q16 - List all registered users in order by userid; for each user,
+      include the userid, name, and an indication of whether the
+      user is active (has at least one bid on record) or inactive
+      (has no bid on record).
+Q17 - List the names of users, if any, who have bid on every item.
+Q18 - List all users in alphabetic order by name. For each user,
+      include descriptions of all the items (if any) that were
+      bid on by that user, in alphabetic order.
+
+Note to Q1: This solution assumes that the current date is 1999-01-31.
+
+Note: many XQuery solutions have start_date/end_date vs. start_day/end_day bug

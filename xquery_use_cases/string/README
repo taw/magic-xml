@@ -1,0 +1,29 @@
+Use Case "STRING": String Search
+from XML Query Use Cases.
+
+Source: http://www.w3.org/TR/xquery-use-cases/#text
+
+Q1 - Find the titles of all news items where
+     the string "Foobar Corporation" appears
+     in the title.
+Q2 - Find news items where the Foobar Corporation
+     and one or more of its partners are mentioned
+     in the same paragraph and/or title.
+     List each news item by its title and date.
+Q4 - Find news items where a company and one
+     of its partners is mentioned in the same
+     news item and the news item is not authored
+     by the company itself.
+Q5 - For each news item that is relevant to the
+     Gorilla Corporation, create an "item summary"
+     element. The content of the item summary is
+     the content of the title, date, and first
+     paragraph of the news item, separated by
+     periods. A news item is relevant if the name
+     of the company is mentioned anywhere within
+     the content of the news item.
+
+Note: Query Q3 has been withdrawn from the use cases document.
+
+Note: Q5 result has "whitespace reformatted for readability"
+      (test_driver is dealing with this one)
