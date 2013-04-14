@@ -2,6 +2,7 @@ require 'rake/rdoctask'
 
 task :default => :package
 
+# This package format is probably not what you want for anything
 desc "Build package"
 task :package => :doc do
     date_string = Time.new.gmtime.strftime("%Y-%m-%d-%H-%M")
