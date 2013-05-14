@@ -1,25 +1,25 @@
-require 'rake/rdoctask'
+require 'rdoc/task'
 
 task :default => :package
 
 # This package format is probably not what you want for anything
 desc "Build package"
 task :package => :doc do
-    date_string = Time.new.gmtime.strftime("%Y-%m-%d-%H-%M")
-    files = FileList[*%w[
-            lib/magic_xml.rb tests.rb
-            doc/**/*
-            simple_examples/*
-            xquery_use_cases/*/*
-            xquery_use_cases/README
-            xquery_use_cases/*.rb
-            ]].exclude{|fn| File.directory? fn}
+  date_string = Time.new.gmtime.strftime("%Y-%m-%d-%H-%M")
+  files = FileList[*%w[
+    lib/magic_xml.rb tests.rb
+    doc/**/*
+    simple_examples/*
+    xquery_use_cases/*/*
+    xquery_use_cases/README
+    xquery_use_cases/*.rb
+  ]].exclude{|fn| File.directory? fn}
 
-    files = files.map{|f| "magic_xml/#{f}"}
-    Dir.chdir("..") {
-        sh "tar", "-z", "-c", "-f", "magic_xml-#{date_string}.tar.gz", *files
-        sh "zip", "-q", "-9", "magic_xml-#{date_string}.zip", *files
-    }
+  files = files.map{|f| "magic-xml/#{f}"}
+  Dir.chdir("..") {
+    sh "tar", "-z", "-c", "-f", "magic_xml-#{date_string}.tar.gz", *files
+    sh "zip", "-q", "-9", "magic_xml-#{date_string}.zip", *files
+  }
 end
 
 desc "Run tests with Ruby 1.8"
@@ -57,7 +57,9 @@ end
 
 def rcov_strip_timestamps(file_name)
   File.update_contents(file_name) do |cnt|
-    cnt.sub(%r[<p>Generated on .*? with <a href='http://eigenclass\.org/hiki\.rb\?rcov'>rcov .*?</a>\n],"")
+    cnt.sub(%r[<p>Generated on .*? with <a href='http://eigenclass\.org/hiki\.rb\?rcov'>rcov .*?</a>\n],"").
+        sub(%r[<p>Generated on .*? with <a href="http://github\.com/relevance/rcov">rcov .*?</a></p>], "")
+
   end
 end
 
@@ -66,7 +68,7 @@ task :doc => [:clean, :rdoc] do
   File.delete("doc/created.rid")
   sh "rcov ./tests.rb"
   # rcov doesn't have any easy way of turning off timestamps, so let's simply cut them out
-  %w[coverage/index.html coverage/magic_xml_rb.html coverage/tests_rb.html].each do |file_name|
+  Dir["coverage/*.html"].each do |file_name|
     rcov_strip_timestamps(file_name)
   end
 end
@@ -74,7 +76,7 @@ end
 rd = Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.rdoc_dir = 'doc'
   rdoc.title    = "magic/xml"
-  rdoc.options << '--inline-source'
+  # rdoc.options << '--inline-source'
   rdoc.rdoc_files.include(Dir["**/*.rb"].select{|x| x != "jamis.rb"})
   rdoc.template = './jamis.rb'
 end 
