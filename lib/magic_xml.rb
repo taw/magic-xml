@@ -480,7 +480,7 @@ class XML
         http = Net::HTTP.new(u.host, u.port)
       end
 
-      res = http.start {|http| http.request(req) }
+      res = http.start {|http_conn| http_conn.request(req) }
       # TODO: Throw a more meaningful exception
       parse(res.body)
     else
@@ -1078,7 +1078,7 @@ class XML
     if pattern.is_a? Symbol
       @name == pattern
     elsif pattern.is_a? Regexp
-      rv = text =~ pattern
+      text =~ pattern
     else # Hash, Pattern_any, Pattern_all
       pattern === self
     end

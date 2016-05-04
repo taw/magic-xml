@@ -1,10 +1,5 @@
 require "stringio"
 
-# Migration from test/unit
-def expect_equal(a,b,msg=nil)
-  expect(a).to eq(b)
-end
-
 describe XML do
   # Test whether XML.new constructors work (without monadic case)
   it "constructors" do
@@ -33,10 +28,10 @@ describe XML do
     doc = XML.parse("<foo><bar id='5'/>a<bar id='3'/>c<bar id='4'/>b<bar id='1'/></foo>")
 
     doc_by_id = doc.sort_by{|c| c[:id]}
-    expect_equal("<foo><bar id='1'/><bar id='3'/><bar id='4'/><bar id='5'/></foo>", doc_by_id.to_s)
+    expect(doc_by_id.to_s).to eq("<foo><bar id='1'/><bar id='3'/><bar id='4'/><bar id='5'/></foo>")
 
     doc_all_by_id = doc.children_sort_by{|c| if c.is_a? XML then [0, c[:id]] else [1, c] end}
-    expect_equal("<foo><bar id='1'/><bar id='3'/><bar id='4'/><bar id='5'/>abc</foo>", doc_all_by_id.to_s)
+    expect(doc_all_by_id.to_s).to eq("<foo><bar id='1'/><bar id='3'/><bar id='4'/><bar id='5'/>abc</foo>")
   end
 
   # Test XML#[] and XML#[]= for attribute access
@@ -54,11 +49,11 @@ describe XML do
     a = XML.new(:p, "Hello")
     a << ", "
     a << "world!"
-    expect_equal("<p>Hello, world!</p>", a.to_s, "XML#<< should work")
+    expect(a.to_s).to eq("<p>Hello, world!</p>")
 
     b = XML.new(:foo)
     b << XML.new(:bar)
-    expect_equal("<foo><bar/></foo>", b.to_s, "XML#<< should work")
+    expect(b.to_s).to eq("<foo><bar/></foo>")
   end
 
   # Test XML#each method for iterating over children
@@ -66,26 +61,26 @@ describe XML do
     a = XML.new(:p, "Hello", ", ", "world", XML.new(:br))
     b = ""
     a.each{|c| b += c.to_s}
-    expect_equal("Hello, world<br/>", b, "XML#each should work")
+    expect(b).to eq("Hello, world<br/>")
   end
 
   # Test XML#map method
   it "map" do
     a = XML.new(:body, XML.new(:h3, "One"), "Hello", XML.new(:h3, "Two"))
-    b = a.map{|c|
+    b = a.map do |c|
       if c.is_a? XML and c.name == :h3
         XML.new(:h2, c.attrs, *c.contents)
       else
         c
       end
-    }
-    expect_equal("<body><h3>One</h3>Hello<h3>Two</h3></body>", a.to_s, "XML#map should not modify the argument")
-    expect_equal("<body><h2>One</h2>Hello<h2>Two</h2></body>", b.to_s, "XML#map should work")
+    end
+    expect(a.to_s).to eq("<body><h3>One</h3>Hello<h3>Two</h3></body>") # XML#map should not modify the argument
+    expect(b.to_s).to eq("<body><h2>One</h2>Hello<h2>Two</h2></body>") # XML#map should work
 
-    d = a.map(:h3) {|c|
-      XML.new(:h2, c.attrs, *c.contents)
-    }
-    expect_equal("<body><h2>One</h2>Hello<h2>Two</h2></body>", d.to_s, "XML#map should accept selectors")
+    d = a.map(:h3) do |e|
+      XML.new(:h2, e.attrs, *e.contents)
+    end
+    expect(d.to_s).to eq("<body><h2>One</h2>Hello<h2>Two</h2></body>") # XML#map should accept selectors
   end
 
   it "==" do
@@ -138,10 +133,10 @@ describe XML do
     c = a.dup{ self[:a] = "2" }
     d = a.dup{ self << ", world!" }
 
-    expect_equal("<foo a='1'>Hello</foo>", a.to_s, "XML#dup{} should not modify its argument")
-    expect_equal("<bar a='1'>Hello</bar>", b.to_s, "XML#dup{} should work")
-    expect_equal("<foo a='2'>Hello</foo>", c.to_s, "XML#dup{} should work")
-    expect_equal("<foo a='1'>Hello, world!</foo>", d.to_s, "XML#dup{} should work")
+    expect(a.to_s).to eq("<foo a='1'>Hello</foo>")
+    expect(b.to_s).to eq("<bar a='1'>Hello</bar>")
+    expect(c.to_s).to eq("<foo a='2'>Hello</foo>")
+    expect(d.to_s).to eq("<foo a='1'>Hello, world!</foo>")
 
     # Deep copy test
     a = XML.new(:h3, "Hello")
@@ -149,8 +144,8 @@ describe XML do
     c = b.dup
     a << ", world!"
 
-    expect_equal("<foo><bar><h3>Hello, world!</h3></bar></foo>", b.to_s, "XML#dup should make a deep copy")
-    expect_equal("<foo><bar><h3>Hello</h3></bar></foo>", c.to_s, "XML#dup should make a deep copy")
+    expect(b.to_s).to eq("<foo><bar><h3>Hello, world!</h3></bar></foo>")
+    expect(c.to_s).to eq("<foo><bar><h3>Hello</h3></bar></foo>")
   end
 
   # Test XML#normalize! method
@@ -163,23 +158,26 @@ describe XML do
     b.normalize!
     c.normalize!
 
-    expect_equal(["Hello"], a.contents, "XML#normalize! should work")
-    expect_equal([], b.contents, "XML#normalize! should work")
-    expect_equal([XML.new(:bar, "1"), XML.new(:bar, "2"), "X", XML.new(:bar, "3")], c.contents, "XML#normalize! should work")
+    expect(a.contents).to eq(["Hello"])
+    expect(b.contents).to eq([])
+    expect(c.contents).to eq([XML.new(:bar, "1"), XML.new(:bar, "2"), "X", XML.new(:bar, "3")])
   end
 
   # Test the "monadic" interface, that is constructors
   # with instance_eval'd blocks passed to them:
   # XML.new(:foo) { bar! } # -> <foo><bar/></foo>
   it "monadic" do
-    a = XML.new(:foo) { bar!; xml!(:xxx) }
-    b = xml(:div) {
-      ul! {
+    a = XML.new(:foo) do
+      bar!
+      xml!(:xxx)
+    end
+    b = xml(:div) do
+      ul! do
         li!(XML.a("Hello"))
-      }
-    }
-    expect_equal("<foo><bar/><xxx/></foo>", a.to_s, "Monadic interface should work")
-    expect_equal("<div><ul><li><a>Hello</a></li></ul></div>", b.to_s, "Monadic interface should work")
+      end
+    end
+    expect(a.to_s).to eq("<foo><bar/><xxx/></foo>")
+    expect(b.to_s).to eq("<div><ul><li><a>Hello</a></li></ul></div>")
   end
 
   # Test if parsing and printing gives the right results
@@ -204,8 +202,7 @@ describe XML do
   it "parse_extra_escapes" do
     a     = "<foo>&quot; &apos;</foo>"
     a_out = "<foo>\" '</foo>"
-
-    expect_equal(a_out, XML.parse(a).to_s, "XML.parse(x).to_s should normalize entities in x")
+    expect(XML.parse(a).to_s).to eq(a_out)
   end
 
   # Test handling extra cruft
@@ -213,28 +210,28 @@ describe XML do
   it "parse_extra_cdata" do
     a     = "<foo><![CDATA[<greeting>Hello, world!</greeting>]]></foo>"
     a_out = "<foo>&lt;greeting&gt;Hello, world!&lt;/greeting&gt;</foo>"
-    expect_equal(a_out, XML.parse(a).to_s, "XML.parse(x).to_s should equal normalized x")
+    expect(XML.parse(a).to_s).to eq(a_out)
   end
 
   # Test handling (=ignoring) XML declarations
   it "parse_extra_qxml" do
     b     = "<?xml version=\"1.0\"?><greeting>Hello, world!</greeting>"
     b_out = "<greeting>Hello, world!</greeting>"
-    expect_equal(b_out, XML.parse(b).to_s, "XML.parse(x).to_s should equal normalized x")
+    expect(XML.parse(b).to_s).to eq(b_out)
   end
 
   # Test handling (=ignoring) DTDs
   it "parse_extra_dtd" do
     c     = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><!DOCTYPE greeting [<!ELEMENT greeting (#PCDATA)>]><greeting>Hello, world!</greeting>"
     c_out = "<greeting>Hello, world!</greeting>"
-    expect_equal(c_out, XML.parse(c).to_s, "XML.parse(x).to_s should equal normalized x")
+    expect(XML.parse(c).to_s).to eq(c_out)
   end
 
   # Test handling (=ignoring) DTDs
   it "parse_extra_comment" do
     c     = "<!-- this is a comment --><greeting>Hello,<!-- another comment --> world!</greeting>"
     c_out = "<greeting>Hello, world!</greeting>"
-    expect_equal(c_out, XML.parse(c).to_s, "XML.parse(x).to_s should equal normalized x")
+    expect(XML.parse(c).to_s).to eq(c_out)
   end
 
   # Test reading from a file
@@ -247,12 +244,12 @@ describe XML do
     f = "<foo><bar></bar></foo>".xml_parse
     g = XML.foo { bar! }
 
-    expect_equal(g.to_s, a.to_s, "File#xml_parse should work")
-    expect_equal(g.to_s, b.to_s, "XML.from_file should work")
-    expect_equal(g.to_s, c.to_s, "XML.from_url(\"file:...\") should work")
-    expect_equal(g.to_s, d.to_s, "XML.from_url(\"string:...\") should work")
-    expect_equal(g.to_s, e.to_s, "XML.parse should work")
-    expect_equal(g.to_s, f.to_s, "String#xml_parse should work")
+    expect(a.to_s).to eq(g.to_s) # File#xml_parse should work
+    expect(b.to_s).to eq(g.to_s) # XML.from_file should work
+    expect(c.to_s).to eq(g.to_s) # XML.from_url(\"file:...\") should work
+    expect(d.to_s).to eq(g.to_s) # XML.from_url(\"string:...\") should work
+    expect(e.to_s).to eq(g.to_s) # XML.parse should work
+    expect(f.to_s).to eq(g.to_s) # String#xml_parse should work
   end
 
   # Test XML#children and Array#children
@@ -263,8 +260,8 @@ describe XML do
     d = XML.foo(a,c)
     e = d.children(:bar)
     f = e.children(:bar)
-    expect_equal([a,c], e, "XML#children(tag) should return tag-tagged children")
-    expect_equal([b], f, "Array#children(tag) should return tag-tagged children of its elements")
+    expect(e).to eq([a,c]) # XML#children(tag) should return tag-tagged children
+    expect(f).to eq([b])   # Array#children(tag) should return tag-tagged children of its elements
   end
 
   # Test XML#descendants and Array#descendants
@@ -275,18 +272,20 @@ describe XML do
     d = XML.foo(a,c)
     e = d.descendants(:bar)
     f = e.descendants(:bar)
-    expect_equal([a,c,b], e, "XML#descendants(tag) should return tag-tagged descendants")
-    expect_equal([b], f, "Array#descendants(tag) should return tag-tagged descendants of its elements")
+    expect(e).to eq([a,c,b]) # XML#descendants(tag) should return tag-tagged descendants
+    expect(f).to eq([b]) # Array#descendants(tag) should return tag-tagged descendants of its elements
   end
 
   # Test XML#exec! monadic interface
   it "exec" do
     a = XML.foo
-    a.exec! {
-      bar! { text! "Hello" }
+    a.exec! do
+      bar! do
+        text! "Hello"
+      end
       text! "world"
-    }
-    expect_equal("<foo><bar>Hello</bar>world</foo>", a.to_s, "XML#exec! should work")
+    end
+    expect(a.to_s).to eq("<foo><bar>Hello</bar>world</foo>")
   end
 
   # Test XML#child
@@ -295,10 +294,10 @@ describe XML do
     b = XML.parse("<foo><bar a='1'/></foo>")
     c = XML.parse("<foo><bar a='1'/><bar a='2'/></foo>")
 
-    expect_equal(nil, a.child(:bar), "XML#child should return nil if there are no matching children")
-    expect_equal("<bar a='1'/>", b.child(:bar).to_s, "XML#child should work")
-    expect_equal("<bar a='1'/>", c.child(:bar).to_s, "XML#child should return first child if there are many")
-    expect_equal("<bar a='2'/>", c.child({:a => '2'}).to_s, "XML#child should support patterns")
+    expect(a.child(:bar)).to eq(nil) # XML#child should return nil if there are no matching children
+    expect(b.child(:bar).to_s).to eq("<bar a='1'/>") # XML#child should work
+    expect(c.child(:bar).to_s).to eq("<bar a='1'/>") # XML#child should return first child if there are many
+    expect(c.child({:a => '2'}).to_s).to eq("<bar a='2'/>") # XML#child should support patterns
   end
 
   # Test XML#descendant
@@ -309,14 +308,14 @@ describe XML do
     d = XML.parse("<foo><bar a='1'><bar a='2'/></bar><bar a='3'/></foo>")
     e = XML.parse("<foo><foo><bar a='1'/></foo><bar a='2'/></foo>")
 
-    expect_equal(nil, a.descendant(:bar), "XML#descendant should return nil if there are no matching descendants")
-    expect_equal("<bar a='1'/>", b.descendant(:bar).to_s, "XML#descendant should work")
-    expect_equal("<bar a='1'/>", c.descendant(:bar).to_s, "XML#descendant should return first descendant if there are many")
-    expect_equal("<bar a='1'><bar a='2'/></bar>", d.descendant(:bar).to_s, "XML#descendant should return first descendant if there are many")
-    expect_equal("<bar a='1'/>", e.descendant(:bar).to_s, "XML#descendant should return first descendant if there are many")
-    expect_equal("<bar a='2'/>", c.descendant({:a => '2'}).to_s, "XML#descendant should support patterns")
-    expect_equal("<bar a='2'/>", d.descendant({:a => '2'}).to_s, "XML#descendant should support patterns")
-    expect_equal("<bar a='2'/>", e.descendant({:a => '2'}).to_s, "XML#descendant should support patterns")
+    expect(a.descendant(:bar)).to eq(nil) # XML#descendant should return nil if there are no matching descendants
+    expect(b.descendant(:bar).to_s).to eq("<bar a='1'/>") # XML#descendant should work
+    expect(c.descendant(:bar).to_s).to eq("<bar a='1'/>") # XML#descendant should return first descendant if there are many
+    expect(d.descendant(:bar).to_s).to eq("<bar a='1'><bar a='2'/></bar>") # XML#descendant should return first descendant if there are many
+    expect(e.descendant(:bar).to_s).to eq("<bar a='1'/>") # XML#descendant should return first descendant if there are many
+    expect(c.descendant({:a => '2'}).to_s).to eq("<bar a='2'/>") # XML#descendant should support patterns
+    expect(d.descendant({:a => '2'}).to_s).to eq("<bar a='2'/>") # XML#descendant should support patterns
+    expect(e.descendant({:a => '2'}).to_s).to eq("<bar a='2'/>") # XML#descendant should support patterns
   end
 
   # Test XML#text
@@ -326,10 +325,10 @@ describe XML do
     c = XML.parse("<foo><bar>Hello</bar></foo>")
     d = XML.parse("<foo>He<bar>llo</bar></foo>")
 
-    expect_equal("Hello", a.text, "XML#text should work")
-    expect_equal("", b.text, "XML#text should work")
-    expect_equal("Hello", c.text, "XML#text should work")
-    expect_equal("Hello", d.text, "XML#text should work")
+    expect(a.text).to eq("Hello")
+    expect(b.text).to eq("")
+    expect(c.text).to eq("Hello")
+    expect(d.text).to eq("Hello")
   end
 
   # Test XML#renormalize and XML#renormalize_sequence
@@ -337,9 +336,9 @@ describe XML do
     a = "<foo></foo>"
     b = "<foo></foo><bar></bar>"
 
-    expect_equal("<foo/>", XML.renormalize(a), "XML#renormalize should work")
-    expect_equal("<foo/>", XML.renormalize_sequence(a), "XML#renormalize_sequence should work")
-    expect_equal("<foo/><bar/>", XML.renormalize_sequence(b), "XML#renormalize_sequence should work")
+    expect(XML.renormalize(a)).to eq("<foo/>")
+    expect(XML.renormalize_sequence(a)).to eq("<foo/>")
+    expect(XML.renormalize_sequence(b)).to eq("<foo/><bar/>")
   end
 
   # Test XML#range
@@ -356,13 +355,13 @@ describe XML do
     ar_n_3 = a.range(nil, b[3])
     ar_n_0 = a.range(nil, b[0])
 
-    expect_equal("<foo><bar i='0'/><bar i='1'/><bar i='2'/><bar i='3'/><bar i='4'/></foo>", ar_n_n.to_s, "XML#range should work")
-    expect_equal("<foo><bar i='1'/><bar i='2'/><bar i='3'/><bar i='4'/></foo>", ar_0_n.to_s, "XML#range should work")
-    expect_equal("<foo><bar i='2'/><bar i='3'/><bar i='4'/></foo>", ar_1_n.to_s, "XML#range should work")
-    expect_equal("<foo/>", ar_4_n.to_s, "XML#range should work")
-    expect_equal("<foo><bar i='0'/><bar i='1'/><bar i='2'/><bar i='3'/></foo>", ar_n_4.to_s, "XML#range should work")
-    expect_equal("<foo><bar i='0'/><bar i='1'/><bar i='2'/></foo>", ar_n_3.to_s, "XML#range should work")
-    expect_equal("<foo/>", ar_n_0.to_s, "XML#range should work")
+    expect(ar_n_n.to_s).to eq("<foo><bar i='0'/><bar i='1'/><bar i='2'/><bar i='3'/><bar i='4'/></foo>")
+    expect(ar_0_n.to_s).to eq("<foo><bar i='1'/><bar i='2'/><bar i='3'/><bar i='4'/></foo>")
+    expect(ar_1_n.to_s).to eq("<foo><bar i='2'/><bar i='3'/><bar i='4'/></foo>")
+    expect(ar_4_n.to_s).to eq("<foo/>")
+    expect(ar_n_4.to_s).to eq("<foo><bar i='0'/><bar i='1'/><bar i='2'/><bar i='3'/></foo>")
+    expect(ar_n_3.to_s).to eq("<foo><bar i='0'/><bar i='1'/><bar i='2'/></foo>")
+    expect(ar_n_0.to_s).to eq("<foo/>")
 
     a = XML.parse "<a>
            <b i='0'><c i='0'/><c i='1'/><c i='2'/></b>
@@ -371,21 +370,21 @@ describe XML do
            </a>"
     c = a.descendants(:c)
 
-    c.each_with_index{|ci,i|
-      c.each_with_index{|cj,j|
+    c.each_with_index do |ci,i|
+      c.each_with_index do |cj,j|
         next unless i < j
         ar = a.range(ci,cj)
         cs_present = ar.descendants(:c).map{|n|n[:i].to_i}
-        expect_equal(((i+1)...j).to_a, cs_present, "XML#range(c#{i}, c#{j}) should contain cs between #{i} and #{j}, exclusive, instead got: #{ar}")
-      }
+        expect(((i+1)...j).to_a).to eq(cs_present) # XML#range(c#{i}, c#{j}) should contain cs between #{i} and #{j}, exclusive, instead got: #{ar}"
+      end
       ar = a.range(ci,nil)
       cs_present = ar.descendants(:c).map{|n|n[:i].to_i}
-      expect_equal(((i+1)..8).to_a, cs_present, "XML#range(c#{i}, nil) should contain cs from #{i+1} to 8, instead got: #{ar}")
+      expect(((i+1)..8).to_a).to eq(cs_present) # XML#range(c#{i}, nil) should contain cs from #{i+1} to 8, instead got: #{ar}"
 
       ar = a.range(nil,ci)
       cs_present = ar.descendants(:c).map{|n|n[:i].to_i}
-      expect_equal((0...i).to_a, cs_present, "XML#range(nil, c#{i}) should contain cs from 0 to #{i-1}, instead got: #{ar}")
-    }
+      expect((0...i).to_a).to eq(cs_present) # XML#range(nil, c#{i}) should contain cs from 0 to #{i-1}, instead got: #{ar}"
+    end
   end
 
   # Test XML#subsequence
@@ -402,13 +401,13 @@ describe XML do
     ar_n_3 = a.subsequence(nil, b[3])
     ar_n_0 = a.subsequence(nil, b[0])
 
-    expect_equal("<foo><bar i='0'/><bar i='1'/><bar i='2'/><bar i='3'/><bar i='4'/></foo>", ar_n_n.join, "XML#subsequence should work")
-    expect_equal("<bar i='1'/><bar i='2'/><bar i='3'/><bar i='4'/>", ar_0_n.join, "XML#subsequence should work")
-    expect_equal("<bar i='2'/><bar i='3'/><bar i='4'/>", ar_1_n.join, "XML#subsequence should work")
-    expect_equal("", ar_4_n.join, "XML#subsequence should work")
-    expect_equal("<foo><bar i='0'/><bar i='1'/><bar i='2'/><bar i='3'/></foo>", ar_n_4.join, "XML#subsequence should work")
-    expect_equal("<foo><bar i='0'/><bar i='1'/><bar i='2'/></foo>", ar_n_3.join, "XML#subsequence should work")
-    expect_equal("<foo/>", ar_n_0.join, "XML#subsequence should work")
+    expect(ar_n_n.join).to eq("<foo><bar i='0'/><bar i='1'/><bar i='2'/><bar i='3'/><bar i='4'/></foo>")
+    expect(ar_0_n.join).to eq("<bar i='1'/><bar i='2'/><bar i='3'/><bar i='4'/>")
+    expect(ar_1_n.join).to eq("<bar i='2'/><bar i='3'/><bar i='4'/>")
+    expect(ar_4_n.join).to eq("")
+    expect(ar_n_4.join).to eq("<foo><bar i='0'/><bar i='1'/><bar i='2'/><bar i='3'/></foo>")
+    expect(ar_n_3.join).to eq("<foo><bar i='0'/><bar i='1'/><bar i='2'/></foo>")
+    expect(ar_n_0.join).to eq("<foo/>")
 
     a = XML.parse "<a>
            <b j='0'><c i='0'/><c i='1'/><c i='2'/></b>
@@ -422,21 +421,24 @@ describe XML do
     # we might have returned [<c i='?'/>] as a result,
     # and then it's not a descendant of the result then.
     # This is ugly, and it should be fixed somewhere in magic/xml
-    c.each_with_index{|ci,i|
-      c.each_with_index{|cj,j|
+    c.each_with_index do |ci,i|
+      c.each_with_index do |cj,j|
         next unless i < j
         ar = a.subsequence(ci,cj)
         cs_present = (ar + ar.descendants).find_all{|x| x.is_a? XML and x.name == :c}.map{|n| n[:i].to_i}
-        expect_equal(((i+1)...j).to_a, cs_present, "XML#subsequence(c#{i}, c#{j}) should contain cs between #{i} and #{j}, exclusive, instead got: #{ar.join}")
-      }
+        # XML#subsequence(c#{i}, c#{j}) should contain cs between #{i} and #{j}, exclusive, instead got: #{ar.join}
+        expect(cs_present).to eq(((i+1)...j).to_a)
+      end
       ar = a.subsequence(ci,nil)
       cs_present = (ar + ar.descendants).find_all{|x| x.is_a? XML and x.name == :c}.map{|n| n[:i].to_i}
-      expect_equal(((i+1)..8).to_a, cs_present, "XML#subsequence(c#{i}, nil) should contain cs from #{i+1} to 8, instead got: #{ar.join}")
+        # XML#subsequence(c#{i}, nil) should contain cs from #{i+1} to 8, instead got: #{ar.join}
+      expect(cs_present).to eq(((i+1)..8).to_a)
 
       ar = a.subsequence(nil,ci)
       cs_present = (ar + ar.descendants).find_all{|x| x.is_a? XML and x.name == :c}.map{|n| n[:i].to_i}
-      expect_equal((0...i).to_a, cs_present, "XML#subsequence(nil, c#{i}) should contain cs from 0 to #{i-1}, instead got: #{ar.join}")
-    }
+      # XML#subsequence(nil, c#{i}) should contain cs from 0 to #{i-1}, instead got: #{ar.join}
+      expect(cs_present).to eq((0...i).to_a)
+    end
   end
 
   # Test xml! at top level
@@ -444,11 +446,11 @@ describe XML do
     real_stdout = $stdout
     $stdout = StringIO.new
     xml!(:foo)
-    expect_equal("<foo/>", $stdout.string, "xml! should work")
+    expect($stdout.string).to eq("<foo/>")
 
     $stdout = StringIO.new
     XML.bar!
-    expect_equal("<bar/>", $stdout.string, "XML#foo! should work")
+    expect($stdout.string).to eq("<bar/>")
     $stdout = real_stdout
   end
 
@@ -456,14 +458,7 @@ describe XML do
   # but how about other methods ?
   it "real_method_missing" do
     foo = XML.new(:foo)
-    exception_raised = false
-    begin
-      foo.bar()
-    rescue NoMethodError
-      exception_raised = true
-    end
-    # FIXME: There are other assertions than expect_equal ;-)
-    expect_equal(true, exception_raised, "XML#bar should raise NoMethodError")
+    expect{ foo.bar }.to raise_error(NoMethodError)
   end
 
   # Test XML#parse_as_twigs interface
@@ -471,19 +466,19 @@ describe XML do
     stream = "<foo><p><ul><li>1</li><li>2</li><li>3</li></ul></p><p><br/></p><p/><p><bar/></p></foo>"
     i = 0
     results = []
-    XML.parse_as_twigs(stream) {|n|
+    XML.parse_as_twigs(stream) do |n|
       n.complete! if i == 1 or i == 3
       results << n
       i += 1
-    }
-    expect_equal("<foo/>", results[0].to_s, "XML.parse_as_twigs should work")
-    expect_equal("<p><ul><li>1</li><li>2</li><li>3</li></ul></p>", results[1].to_s, "XML.parse_as_twigs should work")
-    expect_equal("<p/>", results[2].to_s, "XML.parse_as_twigs should work")
-    expect_equal("<br/>", results[3].to_s, "XML.parse_as_twigs should work")
-    expect_equal("<p/>", results[4].to_s, "XML.parse_as_twigs should work")
-    expect_equal("<p/>", results[5].to_s, "XML.parse_as_twigs should work")
-    expect_equal("<bar/>", results[6].to_s, "XML.parse_as_twigs should work")
-    expect_equal(7, results.size, "XML.parse_as_twigs should work")
+    end
+    expect(results[0].to_s).to eq("<foo/>")
+    expect(results[1].to_s).to eq("<p><ul><li>1</li><li>2</li><li>3</li></ul></p>")
+    expect(results[2].to_s).to eq("<p/>")
+    expect(results[3].to_s).to eq("<br/>")
+    expect(results[4].to_s).to eq("<p/>")
+    expect(results[5].to_s).to eq("<p/>")
+    expect(results[6].to_s).to eq("<bar/>")
+    expect(results.size).to eq(7)
   end
 
   # Test XML#inspect
@@ -491,14 +486,14 @@ describe XML do
     a = xml(:a, xml(:b, xml(:c)))
     d = xml(:d)
 
-    expect_equal("<a>...</a>", a.inspect, "XML#inspect should work")
-    expect_equal("<a>...</a>", a.inspect(0), "XML#inspect(levels) should work")
-    expect_equal("<a><b>...</b></a>", a.inspect(1), "XML#inspect(levels) should work")
-    expect_equal("<a><b><c/></b></a>", a.inspect(2), "XML#inspect(levels) should work")
-    expect_equal("<a><b><c/></b></a>", a.inspect(3), "XML#inspect(levels) should work")
-    expect_equal("<d/>", d.inspect, "XML#inspect should work")
-    expect_equal("<d/>", d.inspect(0), "XML#inspect should work")
-    expect_equal("<d/>", d.inspect(1), "XML#inspect should work")
+    expect(a.inspect   ).to eq("<a>...</a>")
+    expect(a.inspect(0)).to eq("<a>...</a>")
+    expect(a.inspect(1)).to eq("<a><b>...</b></a>")
+    expect(a.inspect(2)).to eq("<a><b><c/></b></a>")
+    expect(a.inspect(3)).to eq("<a><b><c/></b></a>")
+    expect(d.inspect   ).to eq("<d/>")
+    expect(d.inspect(0)).to eq("<d/>")
+    expect(d.inspect(1)).to eq("<d/>")
   end
 
   # Test XML#[:@foo] pseudoattributes
@@ -507,12 +502,12 @@ describe XML do
     a = XML.parse("<foo x='10'><x>20</x><y>30</y><x>40</x></foo>")
 
     # XML#[] real attributes
-    expect_equal("10", a[:x])
+    expect(a[:x]).to eq("10")
     expect(a[:y]).to be_nil
     expect(a[:z]).to be_nil
     # XML#[] pseudoattributes
-    expect_equal("20", a[:@x])
-    expect_equal("30", a[:@y])
+    expect(a[:@x]).to eq("20")
+    expect(a[:@y]).to eq("30")
     expect(a[:@z]).to be_nil
   end
 
@@ -528,7 +523,7 @@ describe XML do
     a[:@y] = 2000
     a[:@z] = 3000
 
-    expect_equal("<foo x='100' y='200' z='300'><x>1000</x><y>2000</y><x>40</x><z>3000</z></foo>", a.to_s, "XML#[]= pseudoattributes should work")
+    expect(a.to_s).to eq("<foo x='100' y='200' z='300'><x>1000</x><y>2000</y><x>40</x><z>3000</z></foo>")
   end
 
   # Test entity unescaping
@@ -536,17 +531,16 @@ describe XML do
     a = XML.parse("<foo>&#xA5;&#xFC;&#x2020;</foo>")
     b = XML.parse("<foo>&#165;&#252;&#8224;</foo>")
     c = XML.parse("<foo>&yen;&uuml;&dagger;</foo>")
-    d = ""
-
-    expect_equal(b.text, a.text, "Entity unescaping on XML#Parse should work")
-    expect_equal(c.text, a.text, "Entity unescaping on XML#Parse should work")
-
-    expect_equal(b.to_s, a.to_s, "Entity escaping on XML#to_s should work")
-    expect_equal(c.to_s, a.to_s, "Entity escaping on XML#to_s should work")
 
     # The escapes assume \XXX are byte escapes and the encoding is UTF-8
-    expect_equal("\302\245\303\274\342\200\240", a.text, "Entity unescaping on XML#Parse should work")
-    expect_equal("<foo>\302\245\303\274\342\200\240</foo>", a.to_s, "Entity escaping on XML#to_s should work")
+
+    expect(a.text).to eq("\302\245\303\274\342\200\240")
+    expect(b.text).to eq(a.text)
+    expect(c.text).to eq(a.text)
+
+    expect(a.to_s).to eq("<foo>\302\245\303\274\342\200\240</foo>")
+    expect(b.to_s).to eq(a.to_s)
+    expect(c.to_s).to eq(a.to_s)
   end
 
   # Test patterns support
@@ -559,7 +553,7 @@ describe XML do
     bar     = []
     #hello   = []
 
-    a.descendants {|d|
+    a.descendants do |d|
       case d
       when :bar
         bar << d
@@ -579,13 +573,13 @@ describe XML do
       #when /Hello/
       #    hello << d
       #end
-    }
+    end
 
-    expect_equal([XML.parse("<bar color='blue'>Hello</bar>"), XML.parse("<bar color='red'>world</bar>")], bar, "Pattern matching should work")
-    expect_equal([XML.parse("<bar color='blue'>Hello</bar>")], blue, "Pattern matching should work")
-    expect_equal([XML.parse("<excl>!</excl>")], nocolor, "Pattern matching should work")
+    expect(bar).to eq([XML.parse("<bar color='blue'>Hello</bar>"), XML.parse("<bar color='red'>world</bar>")])
+    expect(blue).to eq([XML.parse("<bar color='blue'>Hello</bar>")])
+    expect(nocolor).to eq([XML.parse("<excl>!</excl>")])
     # Commented out, as it requires overloading Regexp#=~ and therefore Binding.of_caller
-    #expect_equal([XML.parse("<bar color='blue'>Hello</bar>"), "Hello"], hello, "Pattern matching should work")
+    #expect(hello).to eq([XML.parse("<bar color='blue'>Hello</bar>"), "Hello"])
   end
 
   # Test pattern support in #descendants (works the same way in #children)
@@ -600,13 +594,13 @@ describe XML do
     xml      = a.descendants(XML)
     string   = a.descendants(String)
 
-    expect_equal([XML.parse("<bar color='blue'>Hello</bar>"), XML.parse("<bar color='red'>world</bar>")], bar, "Pattern matching should work")
-    expect_equal([XML.parse("<bar color='blue'>Hello</bar>"), XML.parse("<excl color='blue'>!</excl>")], blue, "Pattern matching should work")
-    expect_equal([XML.parse("<bar color='blue'>Hello</bar>")], blue_bar, "Pattern matching should work")
+    expect(bar).to eq([XML.parse("<bar color='blue'>Hello</bar>"), XML.parse("<bar color='red'>world</bar>")])
+    expect(blue).to eq([XML.parse("<bar color='blue'>Hello</bar>"), XML.parse("<excl color='blue'>!</excl>")])
+    expect(blue_bar).to eq([XML.parse("<bar color='blue'>Hello</bar>")])
     # Commented out, as it requires overloading Regexp#=~ and therefore Binding.of_caller
-    #expect_equal([XML.parse("<bar color='blue'>Hello</bar>"), "Hello"], hello, "Pattern matching should work")
-    expect_equal([XML.parse("<bar color='blue'>Hello</bar>"), XML.parse("<bar color='red'>world</bar>"), XML.parse("<excl color='blue'>!</excl>")], xml, "Pattern matching should work")
-    expect_equal(['Hello', ', ', 'world', '!'], string, "Pattern matching should work")
+    #expec(hello).to eql([XML.parse("<bar color='blue'>Hello</bar>"), "Hello"])
+    expect(xml).to eq([XML.parse("<bar color='blue'>Hello</bar>"), XML.parse("<bar color='red'>world</bar>"), XML.parse("<excl color='blue'>!</excl>")])
+    expect(string).to eq(['Hello', ', ', 'world', '!'])
   end
 
   # Test patterns =~ support
@@ -619,7 +613,7 @@ describe XML do
     bar     = []
     hello   = []
 
-    a.descendants{|d|
+    a.descendants do |d|
       if d.is_a?(XML) and d =~ :bar
         bar << d
       end
@@ -635,12 +629,12 @@ describe XML do
       if d =~ /Hello/
         hello << d
       end
-    }
+    end
 
-    expect_equal([XML.parse("<bar color='blue'>Hello</bar>"), XML.parse("<bar color='red'>world</bar>")], bar, "Pattern matching should work")
-    expect_equal([XML.parse("<bar color='blue'>Hello</bar>")], blue, "Pattern matching should work")
-    expect_equal([XML.parse("<excl>!</excl>")], nocolor, "Pattern matching should work")
-    expect_equal([XML.parse("<bar color='blue'>Hello</bar>"), "Hello"], hello, "Pattern matching should work")
+    expect(bar).to eq([XML.parse("<bar color='blue'>Hello</bar>"), XML.parse("<bar color='red'>world</bar>")])
+    expect(blue).to eq([XML.parse("<bar color='blue'>Hello</bar>")])
+    expect(nocolor).to eq([XML.parse("<excl>!</excl>")])
+    expect(hello).to eq([XML.parse("<bar color='blue'>Hello</bar>"), "Hello"])
   end
 
   it "patterns_any_all" do
@@ -659,9 +653,9 @@ describe XML do
     c = a.find_all{|x| x =~ p }
     d = a.find_all{|x| p === x }
 
-    expect_equal("<bar color='red'>5</bar><bar color='red' size='normal'>6</bar>", b.join, "Pattern matching with any/all should work")
-    expect_equal("<bar color='red'>5</bar><bar color='red' size='normal'>6</bar>", c.join, "Pattern matching with any/all should work")
-    expect_equal("<bar color='red'>5</bar><bar color='red' size='normal'>6</bar>", d.join, "Pattern matching with any/all should work")
+    expect(b.join).to eq("<bar color='red'>5</bar><bar color='red' size='normal'>6</bar>")
+    expect(c.join).to eq("<bar color='red'>5</bar><bar color='red' size='normal'>6</bar>")
+    expect(d.join).to eq("<bar color='red'>5</bar><bar color='red' size='normal'>6</bar>")
   end
 
   # Test parse option :ignore_pretty_printing
@@ -685,7 +679,7 @@ describe XML do
     f = XML.parse("<foo> <bar>Hello    world</bar> </foo>")
     f.remove_pretty_printing!
     g = XML.parse("<foo><bar>Hello world</bar></foo>")
-    expect_equal(f.to_s, g.to_s, "XML#remove_pretty_printing! should work")
+    expect(f.to_s).to eq(g.to_s)
   end
 
   # Test remove_pretty_printing! with exception list
@@ -707,7 +701,7 @@ describe XML do
 
     ax.remove_pretty_printing!([:pre])
 
-    expect_equal(bx.to_s, ax.to_s, "XML#remove_pretty_printing!(exceptions) should work")
+    expect(ax.to_s).to eq(bx.to_s)
   end
 
   # Test extra arguments to XML#parse - :comments and :pi
@@ -718,14 +712,14 @@ describe XML do
     ax = XML.parse(a)
     bx = XML.parse(b)
 
-    expect_equal("<foo/>", ax.to_s, "XML#parse should drop PI by default")
-    expect_equal("<foo/>", bx.to_s, "XML#parse should drop comments by default")
+    expect(ax.to_s).to eq("<foo/>") # XML#parse should drop PI by default
+    expect(bx.to_s).to eq("<foo/>") # XML#parse should drop comments by default
 
-    ay = XML.parse(a, :comments => true, :pi => true)
-    by = XML.parse(b, :comments => true, :pi => true)
+    ay = XML.parse(a, comments: true, pi: true)
+    by = XML.parse(b, comments: true, pi: true)
 
-    expect_equal(a, ay.to_s, "XML#parse(str, :pi=>true) should include PI")
-    expect_equal(b, by.to_s, "XML#parse(str, :comments=>true) should include comments")
+    expect(ay.to_s).to eq(a) # XML#parse(str, :pi=>true) should include PI
+    expect(by.to_s).to eq(b) # XML#parse(str, :comments=>true) should include comments
   end
 
   # Test extra arguments to XML#parse - :remove_pretty_printing.
@@ -748,10 +742,10 @@ describe XML do
     expect(c.to_s).to eq(e.to_s) # XML#parse(str, :remove_pretty_printing=>true) should work
   end
 
-  # Test XML.parse(str, :extra_entities => ...)
+  # Test XML.parse(str, extra_entities: ...)
   it "parsing_entities" do
     a = "<foo>&cat; &amp; &dog;</foo>"
-    b = XML.parse(a, :extra_entities => lambda{|e|
+    b = XML.parse(a, extra_entities: lambda{|e|
       case e
       when "cat"
         "neko"
@@ -759,19 +753,17 @@ describe XML do
         "inu"
       end
     })
-    c = XML.parse(a, :extra_entities => {"cat" => "neko", "dog" => "inu"})
+    c = XML.parse(a, extra_entities: {"cat" => "neko", "dog" => "inu"})
 
-    expect_equal("neko & inu", b.text, "XML#parse(str, :extra_entities=>Proc) should work")
-    expect_equal("neko & inu", c.text, "XML#parse(str, :extra_entities=>Hash) should work")
-
-    d = XML.parse(a, :extra_entities => {"cat" => "neko", "dog" => "inu"})
+    expect(b.text).to eq("neko & inu")  # XML#parse(str, :extra_entities=>Proc) should work
+    expect(c.text).to eq("neko & inu")  # XML#parse(str, :extra_entities=>Hash) should work
 
     # Central European characters escapes
     e = "<foo>&zdot;&oacute;&lstrok;w</foo>"
-    f = XML.parse(e, :extra_entities => {"zdot" => 380, "oacute" => 243, "lstrok" => 322})
+    f = XML.parse(e, extra_entities: {"zdot" => 380, "oacute" => 243, "lstrok" => 322})
 
     # Assumes \number does bytes, UTF8
-    expect_equal("\305\274\303\263\305\202w", f.text, "XML#parse(str, :extra_entities=>...) should work with integer codepoints")
+    expect(f.text).to eq("\305\274\303\263\305\202w") # XML#parse(str, :extra_entities=>...) should work with integer codepoints
   end
 
   # Test XML.load
@@ -790,11 +782,11 @@ describe XML do
   # Test multielement selectors
   it "multielement_selectors" do
     a = XML.parse("<foo><bar color='blue'><x/></bar><bar color='red'><x><y i='1'/></x><y i='2'/></bar></foo>")
-    expect_equal("<x/><x><y i='1'/></x>", a.children(:bar, :x).join, "Multielement selectors should work")
-    expect_equal("<y i='2'/>", a.children(:bar, :y).join, "Multielement selectors should work")
-    expect_equal("<y i='1'/><y i='2'/>", a.children(:bar, :*, :y).join, "Multielement selectors should work")
-    expect_equal("<y i='1'/>", a.descendants(:x, :y).join, "Multielement selectors should work")
-    expect_equal("<y i='1'/><y i='2'/>", a.children(:bar, :*, :y).join, "Multielement selectors should work")
+    expect(a.children(:bar, :x).join).to eq("<x/><x><y i='1'/></x>")
+    expect(a.children(:bar, :y).join).to eq("<y i='2'/>")
+    expect(a.children(:bar, :*, :y).join).to eq("<y i='1'/><y i='2'/>")
+    expect(a.descendants(:x, :y).join).to eq("<y i='1'/>")
+    expect(a.children(:bar, :*, :y).join).to eq("<y i='1'/><y i='2'/>")
   end
 
   # Test deep_map
@@ -804,7 +796,7 @@ describe XML do
     expect(b.to_s).to eq("<foo><x/> <foo><y/></foo></foo>")
 
     c = XML.parse("<foo><bar>x</bar> <bar><bar>y</bar></bar></foo>")
-    d = c.deep_map(:bar) {|c| XML.new(:xyz, c.attrs, *c.children) }
+    d = c.deep_map(:bar) {|e| XML.new(:xyz, e.attrs, *e.children) }
     expect(d.to_s).to eq("<foo><xyz>x</xyz> <xyz><bar>y</bar></xyz></foo>")
   end
 
