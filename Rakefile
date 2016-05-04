@@ -1,10 +1,10 @@
 require 'rdoc/task'
 
-task :default => :package
+task "default" => "test"
 
 # This package format is probably not what you want for anything
 desc "Build package"
-task :package => :doc do
+task "package" => "doc" do
   date_string = Time.new.gmtime.strftime("%Y-%m-%d-%H-%M")
   files = FileList[*%w[
     lib/magic_xml.rb tests.rb
@@ -22,25 +22,14 @@ task :package => :doc do
   }
 end
 
-desc "Run tests with Ruby 1.8"
-task :tests_1_8 do
-  ruby_bin = "ruby"
-  Dir.chdir("xquery_use_cases") { sh ruby_bin, "./test_driver.rb", ruby_bin }
-  sh ruby_bin, "./tests.rb"
+desc "Run all tests"
+task "test" do
+  Dir.chdir("xquery_use_cases") { ruby "./test_driver.rb" }
+  sh "./tests.rb"
 end
-
-desc "Run tests with Ruby 1.9"
-task :tests_1_9 do
-  ruby_bin = "ruby1.9"
-  Dir.chdir("xquery_use_cases") { sh ruby_bin, "./test_driver.rb", ruby_bin }
-  sh ruby_bin, "./tests.rb"
-end
-
-desc "Run all tests with Ruby 1.8/1.9"
-task :test => [:tests_1_8, :tests_1_9]
 
 desc "Clean generated files"
-task :clean do
+task "clean" do
   rm_rf "doc/"
   rm_rf "coverage/"
 end
@@ -64,7 +53,7 @@ def rcov_strip_timestamps(file_name)
 end
 
 desc "Build documentation"
-task :doc => [:clean, :rdoc] do
+task "doc" => ["clean", "rdoc"] do
   File.delete("doc/created.rid")
   sh "rcov ./tests.rb"
   # rcov doesn't have any easy way of turning off timestamps, so let's simply cut them out
@@ -73,10 +62,10 @@ task :doc => [:clean, :rdoc] do
   end
 end
 
-rd = Rake::RDocTask.new(:rdoc) do |rdoc|
+Rake::RDocTask.new("rdoc") do |rdoc|
   rdoc.rdoc_dir = 'doc'
   rdoc.title    = "magic/xml"
   # rdoc.options << '--inline-source'
   rdoc.rdoc_files.include(Dir["**/*.rb"].select{|x| x != "jamis.rb"})
   rdoc.template = './jamis.rb'
-end 
+end
