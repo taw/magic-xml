@@ -24,8 +24,7 @@ end
 
 desc "Run all tests"
 task "test" do
-  Dir.chdir("xquery_use_cases") { ruby "./test_driver.rb" }
-  sh "./tests.rb"
+  sh "rspec"
 end
 
 desc "Clean generated files"
@@ -48,7 +47,6 @@ def rcov_strip_timestamps(file_name)
   File.update_contents(file_name) do |cnt|
     cnt.sub(%r[<p>Generated on .*? with <a href='http://eigenclass\.org/hiki\.rb\?rcov'>rcov .*?</a>\n],"").
         sub(%r[<p>Generated on .*? with <a href="http://github\.com/relevance/rcov">rcov .*?</a></p>], "")
-
   end
 end
 
