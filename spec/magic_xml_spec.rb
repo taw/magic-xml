@@ -5,10 +5,6 @@ def expect_equal(a,b,msg=nil)
   expect(a).to eq(b)
 end
 
-def refute_equal(a,b,msg=nil)
-  expect(a).to_not eq(b)
-end
-
 describe XML do
   # Test whether XML.new constructors work (without monadic case)
   it "constructors" do
@@ -17,10 +13,10 @@ describe XML do
     a  = XML.new(:a, {:href => "http://www.google.com/"}, "Google")
     ul = XML.new(:ul, XML.new(:li, "Hello"), XML.new(:li, "world"))
 
-    expect_equal("<br/>", br.to_s, "Constructors should work")
-    expect_equal("<h3>Hello</h3>", h3.to_s, "Constructors should work")
-    expect_equal("<a href='http://www.google.com/'>Google</a>", a.to_s, "Constructors should work")
-    expect_equal("<ul><li>Hello</li><li>world</li></ul>", ul.to_s, "Constructors should work")
+    expect(br.to_s).to eq("<br/>")
+    expect(h3.to_s).to eq("<h3>Hello</h3>")
+    expect( a.to_s).to eq("<a href='http://www.google.com/'>Google</a>")
+    expect(ul.to_s).to eq("<ul><li>Hello</li><li>world</li></ul>")
   end
 
   # Test character escaping on output, in text and in attribute values
@@ -28,8 +24,8 @@ describe XML do
     p = XML.new(:p, "< > &")
     foo = XML.new(:foo, {:bar=>"< > ' \" &"})
 
-    expect_equal("<p>&lt; &gt; &amp;</p>", p.to_s, "Character escaping should work")
-    expect_equal("<foo bar='&lt; &gt; &apos; &quot; &amp;'/>", foo.to_s, "Character escaping in attributes should work")
+    expect(p.to_s).to eq("<p>&lt; &gt; &amp;</p>")
+    expect(foo.to_s).to eq("<foo bar='&lt; &gt; &apos; &quot; &amp;'/>")
   end
 
   # Test #sort_by and #children_sort_by
@@ -46,11 +42,11 @@ describe XML do
   # Test XML#[] and XML#[]= for attribute access
   it "attr" do
     foo = XML.new(:foo, {:x => "1"})
-    expect_equal("1", foo[:x], "Attribute reading should work")
+    expect("1").to eq(foo[:x])
     foo[:x] = "2"
     foo[:y] = "3"
-    expect_equal("2", foo[:x], "Attribute writing should work")
-    expect_equal("3", foo[:y], "Attribute writing should work")
+    expect("2").to eq(foo[:x])
+    expect("3").to eq(foo[:y])
   end
 
   # Test XML#<< method for adding children
@@ -196,12 +192,12 @@ describe XML do
     e = "<foo>&gt; &lt; &amp;</foo>"
     f = "<foo a='b&amp;c'/>"
 
-    expect_equal(a, XML.parse(a).to_s, "XML.parse(x).to_s should equal x for normalized x")
-    expect_equal(b, XML.parse(b).to_s, "XML.parse(x).to_s should equal x for normalized x")
-    expect_equal(c, XML.parse(c).to_s, "XML.parse(x).to_s should equal x for normalized x")
-    expect_equal(d, XML.parse(d).to_s, "XML.parse(x).to_s should equal x for normalized x")
-    expect_equal(e, XML.parse(e).to_s, "XML.parse(x).to_s should equal x for normalized x")
-    expect_equal(f, XML.parse(f).to_s, "XML.parse(x).to_s should equal x for normalized x")
+    expect(XML.parse(a).to_s).to eq(a)
+    expect(XML.parse(b).to_s).to eq(b)
+    expect(XML.parse(c).to_s).to eq(c)
+    expect(XML.parse(d).to_s).to eq(d)
+    expect(XML.parse(e).to_s).to eq(e)
+    expect(XML.parse(f).to_s).to eq(f)
   end
 
   # Test parsing &-entities
@@ -599,7 +595,7 @@ describe XML do
 
     bar      = a.descendants(:bar)
     blue     = a.descendants({:color=>'blue'})
-    blue_bar = a.descendants(all(:bar, {:color=>'blue'}))
+    blue_bar = a.descendants(All[:bar, {:color=>'blue'}])
     #hello    = a.descendants(/Hello/)
     xml      = a.descendants(XML)
     string   = a.descendants(String)
@@ -657,7 +653,7 @@ describe XML do
     <bar color='red' size='normal'>6</bar>
     </foo>"
 
-    p = all({:color => 'red'}, any({:size => nil}, {:size => 'normal'}))
+    p = All[{:color => 'red'}, Any[{:size => nil}, {:size => 'normal'}]]
     # Select childern which color red and size either normal or not specified
     b = a.children(p)
     c = a.find_all{|x| x =~ p }
@@ -681,11 +677,10 @@ describe XML do
       </foo>"
     c = XML.parse(a)
     d = XML.parse(b)
-    e = XML.parse(b)
-    e.remove_pretty_printing!
+    e = XML.parse(b).tap(&:remove_pretty_printing!)
 
-    refute_equal(c.to_s, d.to_s, "XML#parse should not ignore pretty printing by default")
-    expect_equal(c.to_s, e.to_s, "XML#remove_pretty_printing! should work")
+    expect(c.to_s).to_not eq(d.to_s) # XML#parse should not ignore pretty printing by default
+    expect(c.to_s).to eq(e.to_s) # XML#remove_pretty_printing! should work
 
     f = XML.parse("<foo> <bar>Hello    world</bar> </foo>")
     f.remove_pretty_printing!
@@ -749,8 +744,8 @@ describe XML do
     d = XML.parse(b)
     e = XML.parse(b, :remove_pretty_printing => true)
 
-    refute_equal(c.to_s, d.to_s, "XML#parse should not ignore pretty printing by default")
-    expect_equal(c.to_s, e.to_s, "XML#parse(str, :remove_pretty_printing=>true) should work")
+    expect(c.to_s).to_not eq(d.to_s) # XML#parse should not ignore pretty printing by default
+    expect(c.to_s).to eq(e.to_s) # XML#parse(str, :remove_pretty_printing=>true) should work
   end
 
   # Test XML.parse(str, :extra_entities => ...)
@@ -780,16 +775,16 @@ describe XML do
   end
 
   # Test XML.load
-  it "load" do
+  it "#load" do
     a = XML.load("test.xml")
     b = XML.load(File.open("test.xml"))
     c = XML.load("string:<foo><bar></bar></foo>")
     d = XML.load("file:test.xml")
 
-    expect_equal("<foo><bar/></foo>", a.to_s, "XML#load should work")
-    expect_equal("<foo><bar/></foo>", b.to_s, "XML#load should work")
-    expect_equal("<foo><bar/></foo>", c.to_s, "XML#load should work")
-    expect_equal("<foo><bar/></foo>", d.to_s, "XML#load should work")
+    expect(a.to_s).to eq("<foo><bar/></foo>")
+    expect(b.to_s).to eq("<foo><bar/></foo>")
+    expect(c.to_s).to eq("<foo><bar/></foo>")
+    expect(d.to_s).to eq("<foo><bar/></foo>")
   end
 
   # Test multielement selectors
@@ -806,15 +801,15 @@ describe XML do
   it "deep_map" do
     a = XML.parse("<foo><bar>x</bar> <foo><bar>y</bar></foo></foo>")
     b = a.deep_map(:bar) {|c| XML.new(c.text.to_sym) }
-    expect_equal("<foo><x/> <foo><y/></foo></foo>", b.to_s, "XML#deep_map should work")
+    expect(b.to_s).to eq("<foo><x/> <foo><y/></foo></foo>")
 
     c = XML.parse("<foo><bar>x</bar> <bar><bar>y</bar></bar></foo>")
     d = c.deep_map(:bar) {|c| XML.new(:xyz, c.attrs, *c.children) }
-    expect_equal("<foo><xyz>x</xyz> <xyz><bar>y</bar></xyz></foo>", d.to_s, "XML#deep_map should work")
+    expect(d.to_s).to eq("<foo><xyz>x</xyz> <xyz><bar>y</bar></xyz></foo>")
   end
 
   # Test XML.load
-  it "pretty_printer" do
+  it "add_pretty_printing!" do
     a = XML.parse("<foo><bar>x</bar>Boo!<bar><y><z>f</z></y></bar><xyzzy /><bar>Mutiline\nText\n:-)</bar></foo>")
     a.add_pretty_printing!
     expected = "<foo>
@@ -836,6 +831,6 @@ describe XML do
     :-)
   </bar>
 </foo>"
-    expect_equal(expected, a.to_s, "XML#pretty_print! should work")
+    expect(a.to_s).to eq(expected)
   end
 end
