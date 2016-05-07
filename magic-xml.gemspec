@@ -8,7 +8,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = Dir["tests/**"]
   gem.name          = "magic-xml"
   gem.require_paths = ["lib"]
-  gem.version       = "0.2013.04.14"
+  gem.version       = "0.2016.05.07"
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'rspec'
 end
