@@ -9,6 +9,7 @@ Gem::Specification.new do |gem|
   gem.name          = "magic-xml"
   gem.require_paths = ["lib"]
   gem.version       = "0.2016.05.07"
-  gem.add_development_dependency 'rake'
-  gem.add_development_dependency 'rspec'
+  gem.add_dependency "rexml"
+  gem.add_development_dependency "rake"
+  gem.add_development_dependency "rspec"
 end
