@@ -1,4 +1,6 @@
-#!/usr/bin/ruby -I../../lib -rmagic_xml
+#!/usr/bin/env ruby
+
+require "magic_xml"
 XML.results! {
     XML.load('books.xml').descendants {|d|
         if d.is_a? XML and (d.name == :chapter or d.name == :section)

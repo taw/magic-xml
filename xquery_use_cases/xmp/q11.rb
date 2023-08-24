@@ -1,4 +1,6 @@
-#!/usr/bin/ruby -I../../lib -rmagic_xml
+#!/usr/bin/env ruby
+
+require "magic_xml"
 
 XML.bib! {
     doc = XML.load('bib.xml')

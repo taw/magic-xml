@@ -1,11 +1,13 @@
-#!/usr/bin/ruby -I../../lib -rmagic_xml
+#!/usr/bin/env ruby
+
+require "magic_xml"
 
 XML.results! {
     doc = XML.load('bib.xml')
     a = doc.descendants(:author)
     books = doc.children(:book)
 
-    a.map{|node| 
+    a.map{|node|
         [node[:@last], node[:@first]]
     }.uniq.sort.each {|last, first|
         result! {

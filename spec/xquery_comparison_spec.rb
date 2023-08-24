@@ -1,10 +1,12 @@
 describe "xquery comparison" do
   Dir.glob("#{__dir__}/../xquery_use_cases/*/q*.rb").sort.each do |ruby_solution|
-    ruby_solution =~ /\A(.*)\/q(.*)\.rb\z/
+  lib_dir = "#{__dir__}/../lib"
+
+  ruby_solution =~ /\A(.*)\/q(.*)\.rb\z/
     dir, name = $1, $2
     it "#{name}" do
       expected = File.read("#{dir}/q#{name}.out")
-      got = Dir.chdir(dir) { `./q#{name}.rb` }
+      got = Dir.chdir(dir) { `RUBYLIB=#{lib_dir} ./q#{name}.rb` }
 
       # Now, expected_out contains a lot of cruft, strip!
       expected.gsub!(/>\s+/, ">")

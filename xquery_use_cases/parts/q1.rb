@@ -1,4 +1,6 @@
-#!/usr/bin/ruby -I../../lib -rmagic_xml
+#!/usr/bin/env ruby
+
+require "magic_xml"
 
 def parts_of(parts, partid)
     res = []

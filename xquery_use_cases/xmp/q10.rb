@@ -1,4 +1,6 @@
-#!/usr/bin/ruby -I../../lib -rmagic_xml
+#!/usr/bin/env ruby
+
+require "magic_xml"
 
 XML.results! {
     doc = XML.load('prices.xml')
@@ -8,7 +10,7 @@ XML.results! {
                 text! doc.children(:book).find_all{|book|
                           book[:@title] == title
                       }.map{|book|
-                          book[:@price].to_f 
+                          book[:@price].to_f
                       }.min
             }
         }

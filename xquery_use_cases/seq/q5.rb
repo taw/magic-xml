@@ -1,4 +1,6 @@
-#!/usr/bin/ruby -I../../lib -rmagic_xml
+#!/usr/bin/env ruby
+
+require "magic_xml"
 
 XML.critical_sequence! {
    p = XML.load('report1.xml').descendants(:section).find {|p| p[:"@section.title"] == "Procedure"}
