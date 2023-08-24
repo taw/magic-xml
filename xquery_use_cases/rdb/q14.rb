@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -I../../lib -rmagic_xml
+#!/usr/bin/env ruby -I../../lib -rmagic_xml
 
 bids = XML.load('bids.xml').children(:bid_tuple)
 
@@ -17,6 +17,6 @@ XML.result! {
             a = a.to_i if a.to_i == a
             avgbid! a
         }
-    
+
     }
 }

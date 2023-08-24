@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -I../../lib -rmagic_xml
+#!/usr/bin/env ruby -I../../lib -rmagic_xml
 
 doc = XML.load('book.xml')
 

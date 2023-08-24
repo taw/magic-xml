@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -I../../lib -rmagic_xml
+#!/usr/bin/env ruby -I../../lib -rmagic_xml
 
 items = XML.load('items.xml').sort_by{|i| i[:@itemno].to_i}
 users = XML.load('users.xml')
@@ -12,7 +12,7 @@ XML.result! {
                 users.each({:@userid => highbid[:@userid]}) {|buyer|
                     best_bid = bids.find_all{|b| b.is_a? XML and b[:@itemno] == item[:@itemno]}.map{|b| b[:@bid].to_i}.max
                     next unless highbid[:@bid].to_i == best_bid
-                    
+
                     jones_bike! {
                         add! item.child(:itemno)
                         add! item.child(:description)

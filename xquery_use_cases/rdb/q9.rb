@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -I../../lib -rmagic_xml
+#!/usr/bin/env ruby -I../../lib -rmagic_xml
 
 items = XML.load('items.xml').children(:item_tuple)
 

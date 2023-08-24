@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -I../../lib -rmagic_xml
+#!/usr/bin/env ruby -I../../lib -rmagic_xml
 
 users = XML.load('users.xml')
 items = XML.load('items.xml')

@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -I../../lib -rmagic_xml
+#!/usr/bin/env ruby -I../../lib -rmagic_xml
 
 XML.load('report1.xml').descendants(:section) {|p|
     next unless p[:"@section.title"] == "Procedure"
