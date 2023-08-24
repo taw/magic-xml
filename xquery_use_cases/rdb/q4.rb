@@ -1,4 +1,6 @@
-#!/usr/bin/env ruby -I../../lib -rmagic_xml
+#!/usr/bin/env ruby
+
+require "magic_xml"
 
 items = XML.load('items.xml')
 bids = XML.load('bids.xml')

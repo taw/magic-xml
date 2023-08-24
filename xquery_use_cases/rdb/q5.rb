@@ -1,4 +1,6 @@
-#!/usr/bin/env ruby -I../../lib -rmagic_xml
+#!/usr/bin/env ruby
+
+require "magic_xml"
 
 items = XML.load('items.xml').sort_by{|i| i[:@itemno].to_i}
 users = XML.load('users.xml')
